@@ -13,12 +13,12 @@ auth  --useshadow  --passalgo=sha512
 rootpw  --iscrypted $default_password_crypted
 clearpart --all --initlabel
  
-part pv.194 --fstype="lvmpv" --ondisk=sda --size=1024 --grow
+#part biosboot --fstype=biosboot --size=1
 part /boot --fstype="xfs" --ondisk=sda --size=1024
-part biosboot --fstype=biosboot --size=1
+part pv.194 --fstype="lvmpv" --ondisk=sda --size=1024 --grow
 volgroup centos pv.194
 logvol swap --fstype="swap" --size=4096 --name=swap --vgname=centos
-logvol / --fstype="xfs" --size=4096 --name=root --vgname=centos
+logvol / --fstype="xfs" --size=50000 --name=root --vgname=centos
 logvol /data --fstype="xfs" --size=4096 --name=data --vgname=centos --grow
 
 firstboot --disable
