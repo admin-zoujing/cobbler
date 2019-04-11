@@ -26,7 +26,7 @@ logvol /data --fstype="xfs" --size=4096 --name=data --vgname=centos --grow
 firstboot --disable
 selinux --disabled
 #firewall --disabled
-firewall --enabled --http --ftp --ssh --telnet --smtp
+firewall --enabled --http --ftp --ssh --smtp
 logging --level=info
 reboot
 
