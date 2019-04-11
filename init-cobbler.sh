@@ -83,6 +83,8 @@ cat > /var/lib/cobbler/kickstarts/CentOS-7.4-x86_64.ks  <<EOF
 # Cobbler for Kickstart Configurator for CentOS 7 by clsn
 install
 url --url=\$tree
+# Use graphical install
+#graphical
 text
 lang en_US.UTF-8
 keyboard 'us'
@@ -105,7 +107,8 @@ logvol /data --fstype="xfs" --size=4096 --name=data --vgname=centos --grow
 
 firstboot --disable
 selinux --disabled
-firewall --disabled
+#firewall --disable
+firewall --enabled --http --ftp --ssh --telnet --smtp
 logging --level=info
 reboot
 
