@@ -20,7 +20,7 @@ text
 key --skip
 # Firewall configuration
 #firewall --disable
-firewall --enabled --http --ftp --ssh --telnet --smtp
+firewall --enabled --http --ftp --ssh --smtp
 # Run the Setup Agent on first boot
 firstboot --disable
 # System keyboard
