@@ -13,12 +13,12 @@ auth  --useshadow  --passalgo=sha512
 rootpw  --iscrypted $default_password_crypted
 clearpart --all --initlabel
  
-#part biosboot --fstype=biosboot --size=1
+#part biosboot --fstype=biosboot --size=1024
 part /boot --fstype="xfs" --ondisk=sda --size=1024
 part pv.194 --fstype="lvmpv" --ondisk=sda --size=1024 --grow
-volgroup centos pv.194
+volgroup centos  pv.194
 logvol swap --fstype="swap" --size=4096 --name=swap --vgname=centos
-logvol / --fstype="xfs" --size=50000 --name=root --vgname=centos
+logvol / --fstype="xfs" --size=30000 --name=root --vgname=centos
 logvol /data --fstype="xfs" --size=4096 --name=data --vgname=centos --grow
 
 firstboot --disable
@@ -37,24 +37,24 @@ parted -s /dev/sda mklabel gpt
 %end
 
 %packages
-@^minimal
+@additional-devel
+@base
 @compat-libraries
-@core
-@debugging
 @development
-bash-completion
-chrony
-dos2unix
-kexec-tools
-lrzsz
-nmap
-sysstat
-telnet
-tree
-vim
-wget
+@infiniband
+@internet-browser
+@large-systems
+@mainframe-access
+@network-tools
+@performance
+@platform-devel
+@remote-system-management
+@security-tools
+hmaccalc
+
 %end
-  
+
+%end
 %post
 systemctl disable postfix.service
 %end
