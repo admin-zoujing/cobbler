@@ -3,9 +3,9 @@
 #Cobbler全自动批量安装部署Linux系统说明：Cobbler服务器系统：CentOS 7.4 64位
 #IP地址：192.168.8.52
 #需要安装部署的Linux系统：
-#eth0（第一块网卡，用于外网）IP地址段：192.168.40.240-192.168.40.250
+#eth0（第一块网卡，用于外网）IP地址段：192.168.8.240-192.168.8.250
 #eth1（第二块网卡，用于内网）IP地址段：10.0.0.160-10.0.0.200
-#网关：192.168.40.1
+#网关：192.168.8.2
 #DNS：202.103.24.68  114.114.114.114
 #1、准备安装包下载
 ntpdate cn.pool.ntp.org
@@ -69,7 +69,7 @@ sed -i '/kernel $kernel_path/i\        MENU PASSWD' /etc/cobbler/pxe/pxeprofile.
 cobbler sync
 
 #7、导入系统镜像到cobbler,命令格式：cobbler import --path=镜像路径 -- name=安装引导名 --arch=32位或64位
-#mkdir /iso && mkdir -pv /mnt/cdrom/CentOS-7-x86_64
+#mkdir -pv /iso && mkdir -pv /mnt/cdrom/CentOS-7-x86_64
 #mount -o loop /iso/CentOS-7-x86_64-DVD-1708.iso /mnt/cdrom/CentOS-7-x86_64
 #cobbler import --path=/mnt/cdrom/CentOS-7-x86_64  --name=CentOS-7.4-x86_64   --arch=x86_64  
 
@@ -119,29 +119,20 @@ parted -s /dev/sda mklabel gpt
 %end
 
 %packages
+@additional-devel
 @base
 @compat-libraries
-@desktop-debugging
 @development
-@fonts
-@gnome-desktop
-@graphical-admin-tools
 @infiniband
-@input-methods
 @internet-browser
 @large-systems
-@legacy-x
 @mainframe-access
 @network-tools
 @performance
 @platform-devel
-@remote-desktop-clients
 @remote-system-management
 @security-tools
-gnome-disk-utility
-gnome-packagekit
-setroubleshoot
-vinagre
+hmaccalc
 
 %end
   
@@ -155,7 +146,7 @@ EOF
 #cat > /etc/yum.repos.d/my.repo <<EOF
 #[development]
 #name=my-centos7
-#baseurl=file:///mnt/cdrom/CentOS-7-x86_64/Packages/
+#baseurl=file:///mnt/cdrom/CentOS-7-x86_64/
 #enabled=1
 #gpgcheck=0
 #gpgkey=file:///mnt/cdrom/CentOS-7-x86_64/RPM-GPG-KEY-CentOS-7
@@ -166,21 +157,8 @@ EOF
 #system-config-kickstart
 
 #图形化安装
-#挂载光盘源：mount -o loop /iso/CentOS-7-x86_64-DVD-1708.iso /mnt/cdrom/CentOS-7-x86_64
-#cat > /etc/yum.repos.d/my.repo <<EOF
-#[development]
-#name=my-centos7
-#baseurl=file:///mnt/cdrom/CentOS-7-x86_64/Packages/
-#enabled=1
-#gpgcheck=0
-#gpgkey=file:///mnt/cdrom/CentOS-7-x86_64/RPM-GPG-KEY-CentOS-7
-#EOF
-#yum clean all                           
-#yum makecache                             
-#yum repolist                              
-#yum grouplist  
-#yum -y groupinstall "Server with GUI"
-#startx 
+#yum -y upgrade
+#yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 #systemctl set-default graphical.target
 
 
@@ -188,6 +166,10 @@ EOF
 
 
 #使用 Koan 重装系统
-#在重装的机器上安装 koan:   yum -y install koan 
+#在重装的机器上安装 koan:  yum -y install koan 
 #重新安装客户端系统:       koan -r --server=192.168.8.52 --profile=CentOS-7.4-x86_64
 #重新安装指定(客户机)系统: koan -r --server=192.168.8.52 --system=host-188116
+
+
+#戴尔服务器设置PXE:按F2--Device Settings--选择插网线网卡--NIC Configuration--Legacy Boot Protocol改为PXE--保存退出--按F12尝试PXE引导
+#华为服务器设置PXE:按“Delete”/“F4”--Boot--PXE1 Configuration”--保存退出--按F12尝试PXE引导
