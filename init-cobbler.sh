@@ -135,8 +135,14 @@ parted -s /dev/sda mklabel gpt
 @platform-devel
 @remote-system-management
 @security-tools
+@desktop-debugging
+@fonts
+@graphical-admin-tools
+@input-methods
+@kde-desktop
+@legacy-x
+@x11
 hmaccalc
-
 %end
   
 %post
