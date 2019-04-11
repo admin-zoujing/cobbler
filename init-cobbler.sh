@@ -156,7 +156,7 @@ EOF
 #yum -y install system-config-kickstart
 #system-config-kickstart
 
-#图形化安装
+#centos7.4图形化安装
 #yum -y upgrade
 #yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 #systemctl set-default graphical.target
