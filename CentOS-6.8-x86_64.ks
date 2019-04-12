@@ -121,6 +121,3 @@ $SNIPPET('post_anamon')
 $SNIPPET('kickstart_done')
 # End final steps
 %end
-
-#centos6.8图形化安装
-#修改配置文件“/etc/inittab”,改为5的级别
