@@ -169,10 +169,10 @@ EOF
 #yum -y upgrade
 #yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 #systemctl set-default graphical.target
-
+#centos6.8图形化安装
+#修改配置文件“/etc/inittab”,改为5的级别
 
 #若出现license information(license not accepted)，输入1-回车-2-回车-c-回车-c回车，即可解决 
-
 
 #使用 Koan 重装系统
 #在重装的机器上安装 koan:  yum -y install koan 
