@@ -78,6 +78,7 @@ systemctl restart cobblerd.service
 #cobbler import --path=/mnt/cdrom/CentOS-7-x86_64  --name=CentOS-7.4-x86_64   --arch=x86_64 
 #导入ESXI和Ubuntu用图形化报错，必须用命令 
 #cobbler import --path=/mnt/cdrom/VMware-ESXi-6.0.0.x86_64 --name=ESXI-6.0.0 --arch=x86_64
+#/var/lib/cobbler/kickstarts/sample_esxi6.ks要注销$SNIPPET('network_config')
 
 #8、设置profile，按照操作系统版本分别关联系统镜像文件和kickstart自动安装文件,命令：cobbler profile add|edit|remove --name=安装引导名 --distro=系统镜像名 --kickstart=kickstart自动安装文件路径
 #cobbler profile add --name=CentOS-7.4-x86_64 --distro=CentOS-7.4-x86_64 --kickstart=/var/lib/cobbler/kickstarts/CentOS-7.4-x86_64.ks  
