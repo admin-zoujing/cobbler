@@ -61,12 +61,16 @@ wget https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 pip install Django==1.8.9
 python -c "import django; print(django.get_version())"
-systemctl restart httpd
+cobbler sync
+systemctl restart httpd.service 
+systemctl restart cobblerd.service 
 
 #6、创建 PXE 菜单密码11223300
 sed -i "/TIMEOUT 200/i\MENU MASTER PASSWD `openssl passwd -1 -salt sXiKzkus '11223300'`" /etc/cobbler/pxe/pxedefault.template
 sed -i '/kernel $kernel_path/i\        MENU PASSWD' /etc/cobbler/pxe/pxeprofile.template
 cobbler sync
+systemctl restart httpd.service 
+systemctl restart cobblerd.service 
 
 #7、导入系统镜像到cobbler,命令格式：cobbler import --path=镜像路径 -- name=安装引导名 --arch=32位或64位
 #mkdir -pv /iso && mkdir -pv /mnt/cdrom/CentOS-7-x86_64
