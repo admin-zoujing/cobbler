@@ -182,3 +182,6 @@ EOF
 
 #戴尔服务器设置PXE:按F2--Device Settings--选择插网线网卡--NIC Configuration--Legacy Boot Protocol改为PXE--保存退出--按F12尝试PXE引导
 #华为服务器设置PXE:按“Delete”/“F4”--Boot--PXE1 Configuration”--保存退出--按F12尝试PXE引导
+
+#RHEL7去除注册提示:        yum -y remove subscription-manager 
+#RHEL7去除管理里面注册选项:yum -y remove rhn-setup-gnome
