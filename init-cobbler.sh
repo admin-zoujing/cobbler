@@ -75,7 +75,7 @@ systemctl restart cobblerd.service
 #mkdir -pv /iso && mkdir -pv /mnt/cdrom/CentOS-7-x86_64
 #mount -o loop /iso/CentOS-7-x86_64-DVD-1708.iso /mnt/cdrom/CentOS-7-x86_64
 #cobbler import --path=/mnt/cdrom/CentOS-7-x86_64  --name=CentOS-7.4-x86_64   --arch=x86_64 
-#导入ESXI和Ubuntu用图形化报错，必须用命令 
+#导入ESXI用图形化报错，必须用命令 
 #cobbler import --path=/mnt/cdrom/VMware-ESXi-6.0.0.x86_64 --name=ESXI-6.0.0 --arch=x86_64
 #/var/lib/cobbler/kickstarts/sample_esxi6.ks要注销$SNIPPET('network_config')
 
