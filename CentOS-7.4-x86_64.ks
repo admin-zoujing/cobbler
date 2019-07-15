@@ -4,24 +4,25 @@ url --url=$tree
 # Use graphical install
 #graphical
 text
-lang en_US.UTF-8
+lang zh_CN.UTF-8
 keyboard 'us'
 zerombr
 bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
 #Network information
-network --bootproto=dhcp --device=ens33 --onboot=yes --hostname=CentOS7 --activate 
+network --bootproto=dhcp --device=ens33 --onboot=yes --hostname=localhost --activate 
 timezone Asia/Shanghai
 auth  --useshadow  --passalgo=sha512
 rootpw  --iscrypted $default_password_crypted
+user --name=sx --password=sx
 clearpart --all --initlabel
  
-#part biosboot --fstype=biosboot --size=1024
+part biosboot --fstype=biosboot --size=1
 part /boot --fstype="xfs" --ondisk=sda --size=1024
 part pv.194 --fstype="lvmpv" --ondisk=sda --size=1024 --grow
-volgroup centos  pv.194
+volgroup centos pv.194
 logvol swap --fstype="swap" --size=4096 --name=swap --vgname=centos
 logvol / --fstype="xfs" --size=30000 --name=root --vgname=centos
-logvol /data --fstype="xfs" --size=4096 --name=data --vgname=centos --grow
+logvol /home --fstype="xfs" --size=4096 --name=home --vgname=centos --grow
 
 firstboot --disable
 selinux --disabled
@@ -57,13 +58,22 @@ parted -s /dev/sda mklabel gpt
 @fonts
 @graphical-admin-tools
 @input-methods
-@kde-desktop
+@gnome-desktop
 @legacy-x
 @x11
+gcc
 hmaccalc
+wget
+unzip
+ntp
+ftp
+telnet
+kexec-tools
+net-tools
+vim
 %end
-
-%end
+  
 %post
 systemctl disable postfix.service
+systemctl set-default graphical.target
 %end
