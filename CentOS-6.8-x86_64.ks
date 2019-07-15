@@ -6,12 +6,13 @@ bootloader --location=mbr
 # Partition clearing information
 clearpart all --initlabel 
 #Partition information
+part biosboot --fstype=biosboot --size=1024
 part /boot --fstype="ext4" --ondisk=sda --size=500 
 part pv.100 --fstype="lvmpv" --ondisk=sda --size=4096 --grow 
 volgroup VolGroup pv.100 
 logvol swap --fstype="swap" --name=LogVol00 --vgname=VolGroup --size=4096 
 logvol / --fstype="ext4" --name=LogVol01 --vgname=VolGroup --size=30000 
-logvol /data --fstype="ext4" --name=LogVol02 --vgname=VolGroup --size=1024 --grow 
+logvol /home --fstype="ext4" --name=LogVol02 --vgname=VolGroup --size=1024 --grow 
 #Use text mode install
 text
 # Use graphical install
@@ -26,7 +27,7 @@ firstboot --disable
 # System keyboard
 keyboard us
 # System language
-lang en_US
+lang zh_CN
 # Use network installation
 url --url=$tree
 # If any cobbler repo definitions were referenced in the kickstart profile, include them here.
@@ -87,11 +88,20 @@ zerombr
 @system-admin-tools
 @system-management-snmp
 @x11
+gcc
 hmaccalc
-
+wget
+unzip
+ntp
+ftp
+telnet
+kexec-tools
+net-tools
+vim
 %end
   
 %pre
+parted -s /dev/sda mklabel gpt
 $SNIPPET('log_ks_pre')
 $SNIPPET('kickstart_start')
 $SNIPPET('pre_install_network_config')
@@ -120,4 +130,5 @@ $SNIPPET('post_anamon')
 # Start final steps
 $SNIPPET('kickstart_done')
 # End final steps
+sed -i 's|id:3:initdefault:|id:5:initdefault:|' /etc/inittab 
 %end
