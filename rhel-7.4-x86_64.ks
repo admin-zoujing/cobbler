@@ -4,24 +4,25 @@ url --url=$tree
 # Use graphical install
 #graphical
 text
-lang en_US.UTF-8
+lang zh_CN.UTF-8
 keyboard 'us'
 zerombr
 bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
 #Network information
-network --bootproto=dhcp --device=ens33 --onboot=yes --hostname=rhel7 --activate 
+network --bootproto=dhcp --device=ens33 --onboot=yes --hostname=localhost --activate 
 timezone Asia/Shanghai
 auth  --useshadow  --passalgo=sha512
 rootpw  --iscrypted $default_password_crypted
+user --name=sx --password=sx
 clearpart --all --initlabel
  
-#part biosboot --fstype=biosboot --size=1024
+part biosboot --fstype=biosboot --size=1024
 part /boot --fstype="xfs" --ondisk=sda --size=1024
 part pv.194 --fstype="lvmpv" --ondisk=sda --size=1024 --grow
 volgroup rhel  pv.194
 logvol swap --fstype="swap" --size=4096 --name=swap --vgname=rhel
 logvol / --fstype="xfs" --size=30000 --name=root --vgname=rhel
-logvol /data --fstype="xfs" --size=4096 --name=data --vgname=rhel --grow
+logvol /home --fstype="xfs" --size=4096 --name=home --vgname=rhel --grow
 
 firstboot --disable
 selinux --disabled
@@ -53,7 +54,7 @@ parted -s /dev/sda mklabel gpt
 @infiniband
 @input-methods
 @internet-browser
-@kde-desktop
+@gnome-desktop
 @large-systems
 @legacy-unix
 @legacy-x
@@ -79,8 +80,19 @@ parted -s /dev/sda mklabel gpt
 -subversion
 -swig
 -systemtap
+-gcc
+-hmaccalc
+-wget
+-unzip
+-ntp
+-ftp
+-telnet
+-kexec-tools
+-net-tools
+-vim
 %end
 
 %post
 systemctl disable postfix.service
+systemctl set-default graphical.target
 %end
