@@ -3,7 +3,8 @@
 #Cobbler全自动批量安装部署Linux系统说明：Cobbler服务器系统：CentOS 7.4 64位
 #IP地址：192.168.8.52
 #需要安装部署的Linux系统：
-#IP地址段：192.168.8.240-192.168.8.250
+#eth0（第一块网卡，用于外网）IP地址段：192.168.8.240-192.168.8.250
+#eth1（第二块网卡，用于内网）IP地址段：10.0.0.160-10.0.0.200
 #网关：192.168.8.2
 #DNS：202.103.24.68  114.114.114.114
 #1、准备安装包下载
@@ -32,7 +33,7 @@ sed -i 's|range dynamic-bootp        192.168.1.100 192.168.1.254;|range dynamic-
 sed -i 's|next_server:.*|next_server: 192.168.8.52|' /etc/cobbler/settings
 sed -i 's|server:.*|server: 192.168.8.52|' /etc/cobbler/settings
 sed -i 's|manage_dhcp: 0|manage_dhcp: 1|' /etc/cobbler/settings
-salta=`openssl rand -hex 4` && sed -i "s|default_password_crypted:.*|default_password_crypted: \"`openssl passwd -1 -salt $salta '123456'`\"|" /etc/cobbler/settings
+salta=`openssl rand -hex 4` && sed -i "s|default_password_crypted:.*|default_password_crypted: \"`openssl passwd -1 -salt $salta 'Root123456'`\"|" /etc/cobbler/settings
 sed -i 's|@dists=.*|#@dists="sid";|' /etc/debmirror.conf
 sed -i 's|@arches=.*|#@arches="i386"|' /etc/debmirror.conf
 sed -i 's|disable.*|disable                 = no|' /etc/xinetd.d/tftp 
@@ -41,12 +42,16 @@ sed -i 's|#ServerName www.*|ServerName www.cobbler.com:80|' /etc/httpd/conf/http
 chown -R apache:apache /var/www/
 yum install -y cman fence-agents
 cobbler get-loaders
+cobbler get-loaders
 systemctl enable rsyncd.service 
 systemctl enable httpd.service 
 systemctl enable tftp.socket 
 systemctl enable dhcpd.service 
 systemctl enable cobblerd.service 
 cobbler sync
+systemctl restart rsyncd.service 
+systemctl restart tftp.socket 
+systemctl restart dhcpd.service 
 systemctl restart httpd.service 
 systemctl restart cobblerd.service 
 
@@ -75,7 +80,8 @@ systemctl restart cobblerd.service
 #mkdir -pv /iso && mkdir -pv /mnt/cdrom/CentOS-7-x86_64
 #mount -o loop /iso/CentOS-7-x86_64-DVD-1708.iso /mnt/cdrom/CentOS-7-x86_64
 #cobbler import --path=/mnt/cdrom/CentOS-7-x86_64  --name=CentOS-7.4-x86_64   --arch=x86_64 
-#导入ESXI用图形化报错，必须用命令 
+#导入ESXI和Ubuntu用图形化报错，必须用命令 
+#cobbler import --path=/mnt/cdrom/ubuntu-18.04.2-live-server-amd64.iso --name=ubuntu-18.04.2-live-server-amd64 --arch=x86_64
 #cobbler import --path=/mnt/cdrom/VMware-ESXi-6.0.0.x86_64 --name=ESXI-6.0.0 --arch=x86_64
 #/var/lib/cobbler/kickstarts/sample_esxi6.ks要注销$SNIPPET('network_config')
 
@@ -85,25 +91,25 @@ systemctl restart cobblerd.service
 
 #9、创建kickstarts自动安装脚本(配置网卡一定要正确，否则找不到文件)
 cat > /var/lib/cobbler/kickstarts/CentOS-7.4-x86_64.ks  <<EOF
-
 # Cobbler for Kickstart Configurator for CentOS 7 by clsn
 install
 url --url=\$tree
 # Use graphical install
 #graphical
 text
-lang en_US.UTF-8
+lang zh_CN.UTF-8
 keyboard 'us'
 zerombr
 bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
 #Network information
-network --bootproto=dhcp --device=ens33 --onboot=yes --hostname=CentOS7 --activate 
+network --bootproto=dhcp --device=ens33 --onboot=yes --hostname=localhost --activate 
 timezone Asia/Shanghai
 auth  --useshadow  --passalgo=sha512
 rootpw  --iscrypted \$default_password_crypted
+user --name=sx --password=sx
 clearpart --all --initlabel
  
-#part biosboot --fstype=biosboot --size=1
+part biosboot --fstype=biosboot --size=1
 part /boot --fstype="xfs" --ondisk=sda --size=1024
 part pv.194 --fstype="lvmpv" --ondisk=sda --size=1024 --grow
 volgroup centos pv.194
@@ -113,7 +119,7 @@ logvol /data --fstype="xfs" --size=4096 --name=data --vgname=centos --grow
 
 firstboot --disable
 selinux --disabled
-#firewall --disable
+#firewall --disabled
 firewall --enabled --http --ftp --ssh --smtp
 logging --level=info
 reboot
@@ -145,14 +151,24 @@ parted -s /dev/sda mklabel gpt
 @fonts
 @graphical-admin-tools
 @input-methods
-@kde-desktop
+@gnome-desktop
 @legacy-x
 @x11
+gcc
 hmaccalc
+wget
+unzip
+ntp
+ftp
+telnet
+kexec-tools
+net-tools
+vim
 %end
   
 %post
 systemctl disable postfix.service
+systemctl set-default graphical.target
 %end
 EOF
 
@@ -172,13 +188,16 @@ EOF
 #system-config-kickstart
 
 #centos7.4图形化安装
-#yum -y upgrade
-#yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
 #systemctl set-default graphical.target
 #centos6.8图形化安装
 #修改配置文件“/etc/inittab”,改为5的级别
 
+#未安装图形：yum -y upgrade
+#未安装图形：yum -y groupinstall "GNOME Desktop" "Graphical Administration Tools"
+
+
 #若出现license information(license not accepted)，输入1-回车-2-回车-c-回车-c回车，即可解决 
+
 
 #使用 Koan 重装系统
 #在重装的机器上安装 koan:  yum -y install koan 
@@ -191,3 +210,59 @@ EOF
 
 #RHEL7去除注册提示:        yum -y remove subscription-manager 
 #RHEL7去除管理里面注册选项:yum -y remove rhn-setup-gnome
+
+#ubuntu安装中文支持: 
+#vim /etc/apt/sources.list
+##清华源
+#deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+#deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+#deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+#deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+#deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+#deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+#deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+#deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+#deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+#deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+
+##中科大源
+#deb https://mirrors.ustc.edu.cn/ubuntu/ bionic main restricted universe multiverse
+#deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic main restricted universe multiverse
+#deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+#deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+#deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+#deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+#deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+#deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+#deb https://mirrors.ustc.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+#deb-src https://mirrors.ustc.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+ 
+##163源
+#deb http://mirrors.163.com/ubuntu/ bionic main restricted universe multiverse
+#deb http://mirrors.163.com/ubuntu/ bionic-security main restricted universe multiverse
+#deb http://mirrors.163.com/ubuntu/ bionic-updates main restricted universe multiverse
+#deb http://mirrors.163.com/ubuntu/ bionic-proposed main restricted universe multiverse
+#deb http://mirrors.163.com/ubuntu/ bionic-backports main restricted universe multiverse
+#deb-src http://mirrors.163.com/ubuntu/ bionic main restricted universe multiverse
+#deb-src http://mirrors.163.com/ubuntu/ bionic-security main restricted universe multiverse
+#deb-src http://mirrors.163.com/ubuntu/ bionic-updates main restricted universe multiverse
+#deb-src http://mirrors.163.com/ubuntu/ bionic-proposed main restricted universe multiverse
+#deb-src http://mirrors.163.com/ubuntu/ bionic-backports main restricted universe multiverse
+ 
+#阿里源
+#deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+
+#sudo apt-get -y update 
+#sudo apt-get -y upgrade
+#sudo apt-get -y install xinit 
+#sudo apt-get -y install gdm 
+#sudo apt-get -y install --no-install-recommends ubuntu-gnome-desktop
